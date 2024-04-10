@@ -1,9 +1,3 @@
-# Feedback Alignment in PyTorch
-
-This is a simple implementation of [Random synaptic feedback weights support error backpropagation for deep learning](https://www.nature.com/articles/ncomms13276) in PyTorch.
-
-Base codes are adapted from [official PyTorch tutorial](http://pytorch.org/docs/master/notes/extending.html).
-
-It implements simple MLP with one hidden layer, without non-linear activation function.
-
-Run train_fa_vs_bp_linear_model.py to compare performance between feedback alignment vs backpropagation.
+# Feedback Alignment INF8825
+Dans le cadre du projet de fin de session d'INF8225, il faut réimplémenter un papier scientifique et présenter les résultats en classe.
+Ce repo propose donc une implémentation du Feedback alignment présenté dans cet article. [Random synaptic feedback weights support error backpropagation for deep learning](https://www.nature.com/articles/ncomms13276).
