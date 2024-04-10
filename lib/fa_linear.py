@@ -10,7 +10,7 @@ class LinearFANetwork(nn.Module):
     Linear feed-forward networks with feedback alignment learning
     Does NOT perform non-linear activation after each layer
     """
-    def __init__(self, in_features, num_layers, num_hidden_list):
+    def __init__(self, in_features, num_layers, num_hidden_list, activation_funtion):
         """
         :param in_features: dimension of input features (784 for MNIST)
         :param num_layers: number of layers for feed-forward net
@@ -20,6 +20,7 @@ class LinearFANetwork(nn.Module):
         self.in_features = in_features
         self.num_layers = num_layers
         self.num_hidden_list = num_hidden_list
+        self.activation_function = activation_funtion
 
         # create list of linear layers
         # first hidden layer
@@ -42,9 +43,10 @@ class LinearFANetwork(nn.Module):
         linear1 = self.linear[0](inputs)
 
         # second layer
-        linear2 = self.linear[1](linear1)
+        for layer in self.linear[1:]:
+            linear1 = F.tanh(layer(linear1))
 
-        return linear2
+        return linear1
 
 
 class LinearFAFunction(autograd.Function):
@@ -56,6 +58,8 @@ class LinearFAFunction(autograd.Function):
         output = input.mm(weight.t())
         if bias is not None:
             output += bias.unsqueeze(0).expand_as(output)
+
+        
         return output
 
     @staticmethod
