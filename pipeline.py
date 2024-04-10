@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
+import torch.nn.functional as F
 import torch
 from lib import fa_linear
 from lib import linear
@@ -14,9 +15,8 @@ print('device =',device)
 
 
 def train_model(model, optimizer, train_loader, num_epochs):
-    modelName = model.__class__.__name__
-    print("\nTraining", modelName)
-    logger_train = open('logs/' + modelName + 'train_log.txt', 'w')
+    logName = f"{model.__class__.__name__}_{model.num_layers}"
+    logger_train = open(f"logs/{logName}.txt", 'w')
     for epoch in range(1, num_epochs+1):
         for idx_batch, (inputs, targets) in enumerate(train_loader):
             # flatten the inputs from square image to 1d vector
@@ -87,15 +87,17 @@ if __name__ == '__main__':
                                             ])),
                             batch_size=BATCH_SIZE, shuffle=True)
 
-    model_fa = fa_linear.LinearFANetwork(in_features=784, num_layers=2, num_hidden_list=[1000, 10]).to(device)
-    model_bp = linear.LinearNetwork(in_features=784, num_layers=2, num_hidden_list=[1000, 10]).to(device)
+    model_fa = fa_linear.LinearFANetwork(in_features=784, num_layers=2, num_hidden_list=[1000, 10], activation_function=F.tanh).to(device)
     optimizer_fa = torch.optim.SGD(model_fa.parameters(),lr=1e-4, momentum=0.9, weight_decay=0.001, nesterov=True)
+    
+    model_bp = linear.LinearNetwork(in_features=784, num_layers=2, num_hidden_list=[1000, 10]).to(device)
     optimizer_bp = torch.optim.SGD(model_bp.parameters(),lr=1e-4, momentum=0.9, weight_decay=0.001, nesterov=True)
+    
     loss_crossentropy = torch.nn.CrossEntropyLoss()
 
-    train_model(model_bp, optimizer_bp, train_loader, num_epochs=5)
-    print("Testing BackProp Linear Model...")
-    test_model(model_bp, test_loader, loss_crossentropy)
+    # train_model(model_bp, optimizer_bp, train_loader, num_epochs=5)
+    # print("Testing BackProp Model...")
+    # test_model(model_bp, test_loader, loss_crossentropy)
     
     train_model(model_fa, optimizer_fa,train_loader, num_epochs=5)
     print("Testing Feedforward DFA Model...")
