@@ -95,11 +95,11 @@ if __name__ == '__main__':
     print("Testing Feedforward DFA Model...")
     test_model(model_fa, test_loader, loss_crossentropy)
 
-    # model_bp = backprop.BackPropNetwork(in_features=784, num_layers=4, num_hidden_list=[1000, 30, 20, 10]).to(device)
-    # optimizer_bp = torch.optim.SGD(model_bp.parameters(),lr=1e-4, momentum=0.9, weight_decay=0.001, nesterov=True)
-    # train_model(model_bp, optimizer_bp, train_loader, num_epochs=50, criterion=loss_crossentropy)
-    # print("Testing BackProp Model...")
-    # test_model(model_bp, test_loader, loss_crossentropy)
+    model_bp = backprop.BackPropNetwork(in_features=784, num_layers=4, num_hidden_list=[1000, 30, 20, 10]).to(device)
+    optimizer_bp = torch.optim.SGD(model_bp.parameters(),lr=1e-4, momentum=0.9, weight_decay=0.001, nesterov=True)
+    train_model(model_bp, optimizer_bp, train_loader, num_epochs=50, criterion=loss_crossentropy)
+    print("Testing BackProp Model...")
+    test_model(model_bp, test_loader, loss_crossentropy)
     
     
 
