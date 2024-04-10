@@ -6,11 +6,9 @@ from torch.autograd import Variable
 import torch
 from lib import fa_linear
 from lib import linear
-import os
-
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
+print(device)
 
 BATCH_SIZE = 32
 
@@ -47,7 +45,7 @@ results_path = 'bp_vs_fa_'
 logger_train = open(results_path + 'train_log.txt', 'w')
 
 # train loop
-epochs = 1000
+epochs = 5
 for epoch in range(epochs):
     for idx_batch, (inputs, targets) in enumerate(train_loader):
         # flatten the inputs from square image to 1d vector
@@ -72,7 +70,7 @@ for epoch in range(epochs):
         if (idx_batch + 1) % 10 == 0:
             train_log = 'epoch ' + str(epoch) + ' step ' + str(idx_batch + 1) + \
                         ' loss_fa ' + str(loss_fa.item()) + ' loss_bp ' + str(loss_bp.item())
-            print(train_log)
+            # print(train_log)
             logger_train.write(train_log + '\n')
 
 
