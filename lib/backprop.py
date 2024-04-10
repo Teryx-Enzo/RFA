@@ -71,14 +71,14 @@ class Linear(nn.Module):
         return LinearFunction.apply(input, self.weight, self.bias)
 
 
-class LinearNetwork(nn.Module):
+class BackPropNetwork(nn.Module):
     def __init__(self, in_features, num_layers, num_hidden_list, activation_function=F.tanh):
         """
         :param in_features: dimension of input features (784 for MNIST)
         :param num_layers: number of layers for feed-forward net
         :param num_hidden_list: list of integers indicating hidden nodes of each layer
         """
-        super(LinearNetwork, self).__init__()
+        super(BackPropNetwork, self).__init__()
         self.in_features = in_features
         self.num_layers = num_layers
         self.num_hidden_list = num_hidden_list

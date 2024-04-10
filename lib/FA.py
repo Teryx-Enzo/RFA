@@ -5,7 +5,7 @@ from torch import autograd
 from torch.autograd import Variable
 
 
-class LinearFANetwork(nn.Module):
+class FANetwork(nn.Module):
     """
     Linear feed-forward networks with feedback alignment learning
     Does NOT perform non-linear activation after each layer
@@ -16,7 +16,7 @@ class LinearFANetwork(nn.Module):
         :param num_layers: number of layers for feed-forward net
         :param num_hidden_list: list of integers indicating hidden nodes of each layer
         """
-        super(LinearFANetwork, self).__init__()
+        super(FANetwork, self).__init__()
         self.in_features = in_features
         self.num_layers = num_layers
         self.num_hidden_list = num_hidden_list

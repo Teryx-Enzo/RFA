@@ -5,8 +5,8 @@ from torch.utils.data import DataLoader
 from torch.autograd import Variable
 import torch.nn.functional as F
 import torch
-from lib import fa_linear
-from lib import linear
+from lib import FA
+from lib import backprop
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -14,8 +14,9 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print('device =',device)
 
 
-def train_model(model, optimizer, train_loader, num_epochs):
+def train_model(model, optimizer, train_loader, num_epochs, criterion):
     logName = f"{model.__class__.__name__}_{model.num_layers}"
+    print("Training", logName)
     logger_train = open(f"logs/{logName}.txt", 'w')
     for epoch in range(1, num_epochs+1):
         for idx_batch, (inputs, targets) in enumerate(train_loader):
@@ -25,13 +26,13 @@ def train_model(model, optimizer, train_loader, num_epochs):
             inputs, targets = Variable(inputs), Variable(targets)
             # get outputs from the model
             outputs = model(inputs.to(device))
-            loss = loss_crossentropy(outputs, targets.to(device))
+            loss = criterion(outputs, targets.to(device))
 
             model.zero_grad()
             loss.backward()
             optimizer.step()
 
-            if (idx_batch + 1) % 10 == 0:
+            if (idx_batch + 1) % 100 == 0:
                 train_log = 'epoch ' + str(epoch) + ' step ' + str(idx_batch + 1) + \
                             ' loss ' + str(loss.item())
                 print(f"epoch {epoch};  step {idx_batch+1}          ", end='\r')
@@ -86,21 +87,20 @@ if __name__ == '__main__':
                                                 transforms.Normalize((0.1307,), (0.3081,))
                                             ])),
                             batch_size=BATCH_SIZE, shuffle=True)
-
-    model_fa = fa_linear.LinearFANetwork(in_features=784, num_layers=2, num_hidden_list=[1000, 10], activation_function=F.tanh).to(device)
-    optimizer_fa = torch.optim.SGD(model_fa.parameters(),lr=1e-4, momentum=0.9, weight_decay=0.001, nesterov=True)
-    
-    model_bp = linear.LinearNetwork(in_features=784, num_layers=2, num_hidden_list=[1000, 10]).to(device)
-    optimizer_bp = torch.optim.SGD(model_bp.parameters(),lr=1e-4, momentum=0.9, weight_decay=0.001, nesterov=True)
-    
     loss_crossentropy = torch.nn.CrossEntropyLoss()
+    
+    model_fa = FA.FANetwork(in_features=784, num_layers=4, num_hidden_list=[1000, 30, 20, 10], activation_function=F.tanh).to(device)
+    optimizer_fa = torch.optim.SGD(model_fa.parameters(),lr=1e-4, momentum=0.9, weight_decay=0.001, nesterov=True)
+    train_model(model_fa, optimizer_fa,train_loader, num_epochs=50, criterion=loss_crossentropy)
+    print("Testing Feedforward DFA Model...")
+    test_model(model_fa, test_loader, loss_crossentropy)
 
-    # train_model(model_bp, optimizer_bp, train_loader, num_epochs=5)
+    # model_bp = backprop.BackPropNetwork(in_features=784, num_layers=4, num_hidden_list=[1000, 30, 20, 10]).to(device)
+    # optimizer_bp = torch.optim.SGD(model_bp.parameters(),lr=1e-4, momentum=0.9, weight_decay=0.001, nesterov=True)
+    # train_model(model_bp, optimizer_bp, train_loader, num_epochs=50, criterion=loss_crossentropy)
     # print("Testing BackProp Model...")
     # test_model(model_bp, test_loader, loss_crossentropy)
     
-    train_model(model_fa, optimizer_fa,train_loader, num_epochs=5)
-    print("Testing Feedforward DFA Model...")
-    test_model(model_fa, test_loader, loss_crossentropy)
+    
 
     
