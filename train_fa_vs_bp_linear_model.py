@@ -74,3 +74,44 @@ for epoch in range(epochs):
                         ' loss_fa ' + str(loss_fa.item()) + ' loss_bp ' + str(loss_bp.item())
             print(train_log)
             logger_train.write(train_log + '\n')
+
+
+# Function to test the model
+def test_model(model, test_loader, criterion):
+    model.eval()  # Set the model to evaluation mode
+    test_loss = 0.0
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for data, targets in test_loader:
+            # Flatten the inputs from square image to 1d vector
+            inputs = data.view(data.size(0), -1)
+            # Wrap inputs and targets into variables
+            inputs, targets = Variable(inputs), Variable(targets)
+            # Get outputs from the model
+            outputs = model(inputs.to(device))
+            # Calculate loss
+            loss = criterion(outputs, targets.to(device))
+            # Sum up batch loss
+            test_loss += loss.item() * inputs.size(0)
+            # Get the predicted labels
+            _, predicted = torch.max(outputs.data, 1)
+            # Total number of samples
+            total += targets.size(0)
+            # Number of correct predictions
+            correct += (predicted == targets.to(device)).sum().item()
+
+    # Average test loss
+    test_loss = test_loss / total
+    # Accuracy
+    accuracy = 100 * correct / total
+
+    print('Test Loss: {:.4f}'.format(test_loss))
+    print('Accuracy: {:.2f}%'.format(accuracy))
+
+# Test the models
+print("Testing Feedforward DFA Model:")
+test_model(model_fa, test_loader, loss_crossentropy)
+
+print("\nTesting Reference Linear Model:")
+test_model(model_bp, test_loader, loss_crossentropy)
