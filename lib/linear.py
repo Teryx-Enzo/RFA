@@ -72,7 +72,7 @@ class Linear(nn.Module):
 
 
 class LinearNetwork(nn.Module):
-    def __init__(self, in_features, num_layers, num_hidden_list):
+    def __init__(self, in_features, num_layers, num_hidden_list, activation_function=F.tanh):
         """
         :param in_features: dimension of input features (784 for MNIST)
         :param num_layers: number of layers for feed-forward net
@@ -82,6 +82,7 @@ class LinearNetwork(nn.Module):
         self.in_features = in_features
         self.num_layers = num_layers
         self.num_hidden_list = num_hidden_list
+        self.act = activation_function
 
         # create list of linear layers
         # first hidden layer
@@ -100,9 +101,8 @@ class LinearNetwork(nn.Module):
         :param inputs: inputs with shape [batch_size, in_features]
         :return: logit outputs from the network
         """
-        # first layer
-        linear1 = F.relu(self.linear[0](inputs))
-
-        linear2 = self.linear[1](linear1)
-
-        return linear2
+        output = inputs
+        for layer in self.linear[:-1]:
+            output = self.act(layer(output))
+        output = self.linear[-1](output)
+        return output   
