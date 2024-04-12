@@ -88,18 +88,20 @@ if __name__ == '__main__':
                                             ])),
                             batch_size=BATCH_SIZE, shuffle=True)
     loss_crossentropy = torch.nn.CrossEntropyLoss()
+
+    loss_mse = torch.nn.MSELoss
     
     model_fa = FA.FANetwork(in_features=784, num_layers=4, num_hidden_list=[1000, 30, 20, 10], activation_function=F.tanh).to(device)
     optimizer_fa = torch.optim.SGD(model_fa.parameters(),lr=1e-4, momentum=0.9, weight_decay=0.001, nesterov=True)
     train_model(model_fa, optimizer_fa,train_loader, num_epochs=50, criterion=loss_crossentropy)
     print("Testing Feedforward DFA Model...")
-    test_model(model_fa, test_loader, loss_crossentropy)
+    test_model(model_fa, test_loader, loss_mse)
 
     model_bp = backprop.BackPropNetwork(in_features=784, num_layers=4, num_hidden_list=[1000, 30, 20, 10]).to(device)
     optimizer_bp = torch.optim.SGD(model_bp.parameters(),lr=1e-4, momentum=0.9, weight_decay=0.001, nesterov=True)
     train_model(model_bp, optimizer_bp, train_loader, num_epochs=50, criterion=loss_crossentropy)
     print("Testing BackProp Model...")
-    test_model(model_bp, test_loader, loss_crossentropy)
+    test_model(model_bp, test_loader, loss_mse)
     
     
 
