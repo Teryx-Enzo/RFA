@@ -14,6 +14,17 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print('device =',device)
 
 
+def angle_measure(FA, BP):
+
+    flattenFA, flattenBP = torch.flatten(FA, BP)
+
+    value = torch.norm(torch.transpose(flattenFA, 0 ,1) * flattenBP) / (torch.norm(flattenFA) * torch.norm(flattenBP))
+
+
+    return torch.acos(value)
+
+
+
 def train_model(model, optimizer, train_loader, num_epochs, criterion, batchSize=32):
     logName = f"{model.__class__.__name__}_{model.num_layers}"
     print("Training", logName)
