@@ -47,6 +47,41 @@ def train_model(model, optimizer, train_loader, num_epochs, criterion, batchSize
                 logger_train.write(train_log + '\n')
 
 
+def train_2_models(modelFA, modelBP, optimizerFA,optimizerBP , train_loader, num_epochs, criterion, batchSize=32):
+    logName = f"{modelFA.__class__.__name__}_{modelFA.num_layers}"
+    print("Training", logName)
+    logger_train = open(f"logs/{logName}.txt", 'w')
+    for epoch in range(1, num_epochs+1):
+        for idx_batch, (inputs, targets) in enumerate(train_loader):
+            targetVectors = F.one_hot(targets, 10)
+            inputs = inputs.view(batchSize, -1)
+            inputs, targetVectors = Variable(inputs), Variable(targetVectors)
+            outputsFA = modelFA(inputs.to(device))
+            outputsBP = modelBP(inputs.to(device))
+            lossFA = criterion(outputsFA, targetVectors.to(device).float())
+            lossBP = criterion(outputsBP, targetVectors.to(device).float())
+            modelFA.zero_grad()
+            modelBP.zero_grad()
+            lossFA.backward()
+            lossBP.backward()
+            optimizerFA.step()
+            optimizerBP.step()
+
+            matriceFA = modelFA.linear[-1].weight_fa * lossFA.item()
+            matriceBP = modelBP.linear[-1].weight * lossBP.item()
+            angle =   angle_measure(matriceFA, matriceBP)
+
+            if (idx_batch + 1) % 100 == 0:
+                train_log = 'epoch ' + str(epoch) + ' step ' + str(idx_batch + 1) + \
+                            ' lossFA ' + str(lossFA.item()) + ' lossBP ' + str(lossFA.item()) + ' angle '+ str(angle.item())
+                print(f"epoch {epoch};  step {idx_batch+1}          ", end='\r')
+                logger_train.write(train_log + '\n')
+
+                
+
+                
+                
+
 def test_model(model, test_loader, criterion):
     model.eval()  # Set the model to evaluation mode
     test_loss = 0.0
@@ -99,6 +134,10 @@ if __name__ == '__main__':
     print("Testing BackProp Model...")
     test_model(model_bp, test_loader, loss_mse)
     
-    
 
+    model_fa = FA.FANetwork(in_features=784, num_layers=4, num_hidden_list=[1000, 30, 20, 10], activation_function=F.tanh).to(device)
+    optimizer_fa = torch.optim.SGD(model_fa.parameters(),lr=1e-4, momentum=0.9, weight_decay=0.001, nesterov=True)
+    model_bp = backprop.BackPropNetwork(in_features=784, num_layers=4, num_hidden_list=[1000, 30, 20, 10]).to(device)
+    optimizer_bp = torch.optim.SGD(model_bp.parameters(),lr=1e-4, momentum=0.9, weight_decay=0.001, nesterov=True)
+    train_2_models(model_fa, model_bp, optimizer_fa, optimizer_bp,train_loader, num_epochs=50, criterion=loss_mse, batchSize=BATCH_SIZE)
     
