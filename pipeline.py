@@ -17,10 +17,7 @@ print('device =',device)
 def angle_measure(FA, BP):
 
     flattenFA, flattenBP = torch.flatten(FA, BP)
-
     value = torch.norm(torch.transpose(flattenFA, 0 ,1) * flattenBP) / (torch.norm(flattenFA) * torch.norm(flattenBP))
-
-
     return torch.acos(value)
 
 
